@@ -5,7 +5,7 @@
 
 	// WIKIPEDIA : http://fr.wikipedia.org/w/index.php?title=Sp%C3%A9cial:Modifications_r%C3%A9centes&feed=atom
 	// STACKOVERFLOW : http://stackoverflow.com/feeds/tag/
-	// 
+	
 */
 
 // ----------------------------------
@@ -41,16 +41,16 @@ var query      = {
 						// check if exist,if it's not save it 
 						db[setting.dbCollection].find({guid:e.guid}, 
 							function(err,collection){
-									if(!err){
-										if(collection.length==0){
-											query.save(e,category)
-											//console.log("save new entry")
-										}else{
-											//console.log("already exist",collection.length)
-										}
+								if(!err){
+									if(collection.length==0){
+										query.save(e,category)
+										//console.log("save new entry")
 									}else{
-										console.log("check error")
+										//console.log("already exist",collection.length)
 									}
+								}else{
+									console.log("check error")
+								}
 							}
 						)
 					},
@@ -80,10 +80,6 @@ var query      = {
 						};
 					}
 				}
-
-setInterval(function(){
-			query.query(setting)},
-			setting.delay)
 
 
 // ----------------------------------
@@ -139,58 +135,79 @@ var read 	= {
 					} else {
 					 res.end()
 					}
+				},
+				server:function (req, res) {
+
+				  var uri   	= url.parse(req.url,true),
+				      path  	= uri.pathname,
+				   	  query 	= uri.query,
+				   	  myQuery   = {},
+					  mySort    = {},
+				  	  myField	= null,
+				  	  myLimit 	= 30,
+				  	  mySkip 	= 0,
+				  	  jsonp		= query.callback;
+
+
+				  if(typeof(query.query)!="undefined") myQuery = utile.toJson(unescape(query.query))
+				  if(typeof(query.sort) !="undefined")  mySort = utile.toJson(unescape(query.sort))
+				  if(typeof(query.field)!="undefined") myField = utile.toJson(unescape(query.field))
+				  if(typeof(query.limit)!="undefined" && !isNaN(Number(query.limit)!=NaN)) myLimit = Number(query.limit)
+				  if(typeof(query.skip) !="undefined" && !isNaN(Number(query.skip) !=NaN))  mySkip =  Number(query.skip)
+
+				  console.log("Callback : ",jsonp)
+
+				  //console.log(path,query.query)
+				  // REQUEST EXEMPLE :: q?query={"title":"Install%20mod_wsgi%20in%20mamp"}
+				  
+				  if(path=="/q"){
+				  	console.log("mySort",mySort)
+				  	console.log("myQuery",myQuery)
+				  	console.log("myField",myField)
+
+
+				  	res.writeHead(200, {'Content-Type': 'text/plain'});
+				  	
+				  	if(jsonp) res.write(jsonp+"(")
+
+				  	if(!query){
+				  		read.list(res,myQuery,null,null,myLimit,jsonp)
+				  	}else{
+				  		read.list(res,myQuery,mySort,myField,mySkip,myLimit,jsonp)
+				  	}
+				  } else if(path=="/s"){
+				  	if(!query){
+				  		read.stat(res,query)
+				  	}
+				  }else{
+					  res.writeHead(200, {'Content-Type': 'text/plain'});
+					  res.end("nothing here");
+				  }
 				}
 			  }
 
-
-http.createServer(function (req, res) {
-
-  var uri   	= url.parse(req.url,true),
-      path  	= uri.pathname,
-   	  query 	= uri.query,
-   	  myQuery   = {},
-	  mySort    = {},
-  	  myField	= null,
-  	  myLimit 	= 30,
-  	  mySkip 	= 0,
-  	  jsonp		= query.callback;
-
-
-  if(typeof(query.query)!="undefined") myQuery = JSON.parse(unescape(query.query))
-  if(typeof(query.sort) !="undefined")  mySort = JSON.parse(unescape(query.sort))
-  if(typeof(query.field)!="undefined") myField = JSON.parse(unescape(query.field))
-  if(typeof(query.limit)!="undefined" && !isNaN(Number(query.limit)!=NaN)) myLimit = Number(query.limit)
-  if(typeof(query.skip) !="undefined" && !isNaN(Number(query.skip) !=NaN))  mySkip =  Number(query.skip)
-
-  console.log("Callback : ",jsonp)
-
-  //console.log(path,query.query)
-  // REQUEST EXEMPLE :: q?query={"title":"Install%20mod_wsgi%20in%20mamp"}
-  
-  if(path=="/q"){
-  	console.log("mySort",mySort)
-  	console.log("myQuery",myQuery)
-  	console.log("myField",myField)
+// ----------------------------------
+//
+var utile	= {
+	toJson:function(data){
+		try{
+ 		   return JSON.parse(data);
+		} catch(e) {
+		   return "{}";
+		}
+	}
+}
 
 
-  	res.writeHead(200, {'Content-Type': 'text/plain'});
-  	
-  	if(jsonp) res.write(jsonp+"(")
+// ----------------------------------
 
-  	if(!query){
+// Start the RSS recorder
+setInterval(function(){
+			query.query(setting)},
+			setting.delay)
 
-  		read.list(res,myQuery,null,null,myLimit,jsonp)
-  	}else{
-  		read.list(res,myQuery,mySort,myField,mySkip,myLimit,jsonp)
-  	}
-  } else if(path=="/s"){
-  	if(!query){
-  		read.stat(res,query)
-  	}
-  }else{
-	  res.writeHead(200, {'Content-Type': 'text/plain'});
-	  res.end("nothing here");
-  }
-
-}).listen(setting.serverPort);
+// Start the RSS provider (server)
+http.createServer(
+				function(req, res){read.server(req, res)}
+				).listen(setting.serverPort);
 
