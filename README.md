@@ -14,7 +14,7 @@ Tree endpoint to access the articles :
 * Direct query to access a rss in JSON without storing it : 
 	dq?url=http%3A%2F%2Fstackoverflow.com%2Ffeeds%2Ftag%2Fphp&callback=test
 
-* Statistiques on the db : 
+* Statistiques on the db : (Not yet implemented)
 	s?query={}&sort={}&field={}&limit=30&skipe=0
 
 
