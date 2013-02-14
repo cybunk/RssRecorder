@@ -1,8 +1,10 @@
 RSS provider 
 ===================
 
+## Description
 A simple Node js script to load, save rss feed and serve it as a Json.
 
+## Usage
 Tree endpoint to access the articles : 
 
 * Mongo db query : 
@@ -23,3 +25,9 @@ Jsonp is available on all request :
 
 	provide : 
 	myjsonpfunction([{},{},{} ...])
+
+## Dependencies
+
+feedparser https://github.com/danmactough/node-feedparser
+
+	npm install feedparser
