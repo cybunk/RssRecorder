@@ -2,28 +2,17 @@
 	# NODE JS script :
 	# Query rss, store in mongodb and serve it as json over http
 	# Author : Samuel Huron 
-
-	// WIKIPEDIA : http://fr.wikipedia.org/w/index.php?title=Sp%C3%A9cial:Modifications_r%C3%A9centes&feed=atom
-	// STACKOVERFLOW : http://stackoverflow.com/feeds/tag/
-	
 */
 
 // ----------------------------------
 // SETTINGS
-var setting    = {
-					// mongo parameter
-					dbName:"_vs_examples",
-					dbCollection:"stackoverflow",
+// Check if their is a personal setting if it's not the case take the default one 
+try{
+  var setting     = require("./setting.js")
+} catch(e) {
+  var setting     = require("./defaultsetting.js")
+}
 
-					// http server port 
-					serverPort:9616,
-					
-					// Url to request rss
-					url:"http://stackoverflow.com/feeds/tag/",
-					query:["javascript","java","php","python","c++","html"], // several rss query
-					delay:60*10000, // interval to update in milllisecondes
-					id:'guid'		// element to distinguish one entry to anoter
-				}
 
 // ----------------------------------
 // LOAD LIB 
@@ -37,13 +26,13 @@ var http 	   = require("http"),
 // ----------------------------------
 // RSS QUERY AND SAVE PART
 var query      = {
-					receive:function(e,category){
+					receive:function(e,callback){
 						// check if exist,if it's not save it 
 						db[setting.dbCollection].find({guid:e.guid}, 
 							function(err,collection){
 								if(!err){
 									if(collection.length==0){
-										query.save(e,category)
+										callback(e)
 										//console.log("save new entry")
 									}else{
 										//console.log("already exist",collection.length)
@@ -54,10 +43,9 @@ var query      = {
 							}
 						)
 					},
-					save:function(e,category){
+					save:function(e){
 						e.timeStamp = new Date().getTime()// add timestamp 
-						e._category = category // add category
-
+						//e._category = category // add category
 						db[setting.dbCollection].save(e,function(err){
 							if(!err){
 								console.log("saved")
@@ -68,14 +56,14 @@ var query      = {
 					},
 					query:function(setting){
 						var self = this;
-						for (var i = setting.query.length - 1; i >= 0; i--) {
-							var category = setting.query[i]
-							console.log("!!!!!!!",category)
-
-							feedparser.parseFile(setting.url+category)
+						console.log(setting)
+						for (var i = setting.url.length-1; i >= 0; i--) {
+							var url = setting.url[i]
+							console.log(i,url)
+							feedparser.parseFile(url)
 					  			.on('article', function(e){
-					  				console.log(category,e.title)
-					  				self.receive(e,category)
+					  				console.log(e.title)
+					  				self.receive(e,self.save)
 					  			});					
 						};
 					}
@@ -86,8 +74,17 @@ var query      = {
 // HTTP Server part 
 var read 	= {
 				stat:function(res,q,sort,field){
-					res.writeHead(200, {'Content-Type': 'text/plain'});
+					console.log("ici")
 					res.end("{error:'in construction'}");
+				},
+				directQuery:function(res,jsonp,url){
+					var self = this
+					console.log("query: ",url)
+					feedparser.parseFile(url)
+				  			.on('complete', function(e,a){
+				  				console.log(e,a)
+				  				self.end(res,JSON.stringify(a),jsonp)
+				  			});					
 				},
 				list:function(res,q,sort,field,skip,limit,jsonp){
 					var self = this
@@ -137,16 +134,16 @@ var read 	= {
 					}
 				},
 				server:function (req, res) {
-
 				  var uri   	= url.parse(req.url,true),
 				      path  	= uri.pathname,
 				   	  query 	= uri.query,
 				   	  myQuery   = {},
-					  mySort    = {},
+					  mySort    = {"timeStamp":-1}, // by default serve last element
 				  	  myField	= null,
 				  	  myLimit 	= 30,
 				  	  mySkip 	= 0,
-				  	  jsonp		= query.callback;
+				  	  jsonp		= query.callback,
+				  	  self		= this;
 
 
 				  if(typeof(query.query)!="undefined") myQuery = utile.toJson(unescape(query.query))
@@ -156,28 +153,30 @@ var read 	= {
 				  if(typeof(query.skip) !="undefined" && !isNaN(Number(query.skip) !=NaN))  mySkip =  Number(query.skip)
 
 				  console.log("Callback : ",jsonp)
+				  console.log("Path : ",path)
 
-				  //console.log(path,query.query)
+				  // ----------------------------------
 				  // REQUEST EXEMPLE :: q?query={"title":"Install%20mod_wsgi%20in%20mamp"}
-				  
+				  res.writeHead(200, {'Content-Type': 'application/json'});				  	
+				  if(jsonp) res.write(jsonp+"(")		
+
+				  // ----------------------------------
+				  // QUERY :: dq?url=http%3A%2F%2Fstackoverflow.com%2Ffeeds%2Ftag%2Fphp&callback=test
 				  if(path=="/q"){
-				  	console.log("mySort",mySort)
-				  	console.log("myQuery",myQuery)
-				  	console.log("myField",myField)
-
-
-				  	res.writeHead(200, {'Content-Type': 'text/plain'});
-				  	
-				  	if(jsonp) res.write(jsonp+"(")
-
 				  	if(!query){
-				  		read.list(res,myQuery,null,null,myLimit,jsonp)
+				  		self.list(res,myQuery,null,null,myLimit,jsonp)
 				  	}else{
-				  		read.list(res,myQuery,mySort,myField,mySkip,myLimit,jsonp)
+				  		self.list(res,myQuery,mySort,myField,mySkip,myLimit,jsonp)
+				  	}
+				  } else if(path=="/dq"){
+				  	var myUrl = decodeURIComponent(query.url)
+				  	console.log(myUrl)
+				  	if(typeof(url)!="undefined"){
+				  		self.directQuery(res,jsonp,myUrl)
 				  	}
 				  } else if(path=="/s"){
 				  	if(!query){
-				  		read.stat(res,query)
+				  		self.stat(res,query)
 				  	}
 				  }else{
 					  res.writeHead(200, {'Content-Type': 'text/plain'});
@@ -187,20 +186,21 @@ var read 	= {
 			  }
 
 // ----------------------------------
-//
+// UTILE
 var utile	= {
 	toJson:function(data){
 		try{
  		   return JSON.parse(data);
 		} catch(e) {
+		   console.log("JSON error : ",e)
 		   return "{}";
 		}
 	}
 }
 
+query.query(setting)
 
 // ----------------------------------
-
 // Start the RSS recorder
 setInterval(function(){
 			query.query(setting)},
