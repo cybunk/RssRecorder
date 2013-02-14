@@ -16,6 +16,6 @@ module.exports = {
 		"http://stackoverflow.com/feeds/",
 		//"http://stackoverflow.com/feeds/tag/php",
 		],
-	delay:120*1000,  // interval to update in milllisecondes, default = 2 minute
+	delay:60*1000,  // interval to update in milllisecondes, default = 2 minute
 	id:'guid'		// element to distinguish one entry to anoter
 }
