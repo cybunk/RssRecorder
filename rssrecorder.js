@@ -43,8 +43,10 @@ var utile	= {
 	}
 }
 
-// Start the RSS provider (server)
-http.createServer(
-				function(req, res){read.server(req, res)}
-				).listen(setting.serverPort);
+query.query(setting)
 
+// ----------------------------------
+// Start the RSS recorder
+setInterval(function(){
+			query.query(setting)},
+			setting.delay)
