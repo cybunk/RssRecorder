@@ -5,6 +5,11 @@
 */
 
 module.exports = {
+					db:null,
+					init:function(setting){
+						db  = require("mongojs").connect(setting.dbName, [setting.dbCollection]);
+						return this;
+					},
 					receive:function(e,callback){
 						// check if exist,if it's not save it 
 						db[setting.dbCollection].find({guid:e.guid}, 

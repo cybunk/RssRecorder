@@ -5,7 +5,7 @@ RSS provider
 A simple Node js script to load, save rss feed and serve it as a Json.
 
 ## Usage
-Tree endpoint to access the articles : 
+Tree endpoint to access the rss element : 
 
 * Mongo db query : 
 	
@@ -37,3 +37,36 @@ Jsonp is available on all request :
 feedparser https://github.com/danmactough/node-feedparser
 
 	npm install feedparser
+
+## Installing
+
+Download the latest version here:
+
+* <https://github.com/cybunk/RssRecorder/archive/master.zip>
+
+Or, from the command line:
+
+```bash
+git clone https://github.com/cybunk/RssRecorder.git
+```
+
+Start it : 
+
+Recorder part :
+	node rssrecorder.js
+
+Server part :
+	node rssprovider.js
+
+## Configuration 
+
+module.exports = {
+	dbName:"_vs_examples",			// mongo db dbName
+	dbCollection:"myCollection",	// mongo db collection
+	serverPort:9616,				// server port for http provider
+	url:[							// url array to query 
+		"http://stackoverflow.com/feeds/",
+		],
+	delay:60*1000,  // interval to query in milllisecondes, default = 2 minute
+	id:'guid'		// element to identify one entry to anoter and don't record two time the same element 
+}
