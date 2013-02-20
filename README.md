@@ -2,7 +2,7 @@ RSS provider
 ===================
 
 ## Description
-A simple Node js script to load, save rss feed and serve it as a Json.
+A simple Node js script to load, save rss feed and serve a chunk as a Json over http.
 
 ## Usage
 Tree endpoint to access the rss element : 
