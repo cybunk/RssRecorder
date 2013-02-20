@@ -15,34 +15,15 @@ try{
 
 
 // ----------------------------------
-// LOAD LIB 
-var http 	   = require("http"),
-    url 	   = require("url"),
-	request    = require('request'),
-    feedparser = require('feedparser'),
-	db 		   = require("mongojs").connect(setting.dbName, [setting.dbCollection]);
-
-// ----------------------------------
 // RSS QUERY AND SAVE PART
-var query      = require("./query.js")
+var query      = require("./query.js").init(setting)
 
 // ----------------------------------
 // HTTP Server part 
-var read 		= require("./read.js")
+var read 		= require("./read.js").init(setting)
 
 // ----------------------------------
-// UTILE
-var utile	= {
-	toJson:function(data){
-		try{
- 		   return JSON.parse(data);
-		} catch(e) {
-		   console.log("JSON error : ",e)
-		   return "{}";
-		}
-	}
-}
-
+// FIRST QUERY 
 query.query(setting)
 
 // ----------------------------------
