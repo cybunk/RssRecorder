@@ -60,13 +60,13 @@ Server part :
 
 ## Configuration 
 
-module.exports = {
-	dbName:"_vs_examples",			// mongo db dbName
-	dbCollection:"myCollection",	// mongo db collection
-	serverPort:9616,				// server port for http provider
-	url:[							// url array to query 
-		"http://stackoverflow.com/feeds/",
-		],
-	delay:60*1000,  // interval to query in milllisecondes, default = 2 minute
-	id:'guid'		// element to identify one entry to anoter and don't record two time the same element 
-}
+	module.exports = {
+		dbName:"_vs_examples",			// mongo db dbName
+		dbCollection:"myCollection",	// mongo db collection
+		serverPort:9616,				// server port for http provider
+		url:[							// url array to query 
+			"http://stackoverflow.com/feeds/",
+			],
+		delay:60*1000,  // interval to query in milllisecondes, default = 2 minute
+		id:'guid'		// element to identify one entry to anoter and don't record two time the same element 
+	}
