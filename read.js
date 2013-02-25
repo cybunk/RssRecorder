@@ -11,6 +11,7 @@ module.exports = {
 			    url : require("url"),
 			    utile:require("./utile.js"),
 			    feedparser:require('feedparser'),
+			   	request:require('request'),
 
 			    db:null,
 			    setting:null,
@@ -23,15 +24,42 @@ module.exports = {
 					console.log("ici")
 					res.end("{error:'in construction'}");
 				},
-				directQuery:function(res,jsonp,url){
+				directQuery:function(res,jsonp,query){					
 					var self = this
-					console.log("query: ",url)
-					var request_options = 
-					{
-					    headers: {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17'},
-					};
+					console.log(query.url)
 					try{
-					this.feedparser.parseUrl(url,request_options)
+						var url  = decodeURIComponent(query.url)
+					}catch(e){
+						  self.end(res,"{error:'"+e+"',comment:'decodeURIComponent failed'}",jsonp)
+					}
+					var q 	 = {}
+					q.url 	 = url
+					q.headers= {
+						'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17',
+					   	'Accept-Charset':'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+					   	'Accept-Language':'fr-FR,fr;q=0.8,en-US;q=0.6,en;q=0.4',
+					   	'Cache-Control':'no-cache',
+					};
+					/*
+					console.log(q)
+					try{
+						this.request(q, function (error, response, body) {
+						  if (!error && response.statusCode == 200) {
+						    //console.log(body) // Print the google web page.
+						    self.end(res,"{GotIt:'"+body+"'}",jsonp)
+						  }else{
+						    self.end(res,"{response:'"+response+"',error:'"+error+"'}",jsonp)
+						  }
+						})
+
+					}catch(e){
+						    self.end(res,"{error:'"+e+"'}",jsonp)
+					}
+					*/
+					
+					try{
+
+					this.feedparser.parseUrl(q)
 				  			.on('complete', function(e,a){
 				  				console.log(e,a)
 				  				self.end(res,JSON.stringify(a),jsonp)
@@ -41,7 +69,7 @@ module.exports = {
 				  			});		
 				  	} catch(e) {
 						self.end(res,"{error:'"+e+"'}",jsonp)
-					}			
+					}	
 				},
 				list:function(res,q,sort,field,skip,limit,jsonp){
 					var self = this
@@ -64,7 +92,6 @@ module.exports = {
 							}
 						)
 					}else{
-						console.log("ici")
 						this.db[this.setting.dbCollection].find(q
 						).sort(sort
 						).skip(skip
@@ -127,12 +154,11 @@ module.exports = {
 				  	}
 				  } else if(path=="/dq"){
 				  	
+				  	console.log(uri)
 				  	console.log("q:",query)
-				  	console.log("url:",query.url)
-					var myUrl = decodeURIComponent(query.url)
 
-				  	if(typeof(myUrl)!="undefined" && typeof(myUrl)!=""){
-				  		self.directQuery(res,jsonp,myUrl)
+				  	if(typeof(query.url)!="undefined" && typeof(query.url)!=""){
+				  		self.directQuery(res,jsonp,query)
 				  	}
 				  } else if(path=="/s"){
 				  	if(!query){
