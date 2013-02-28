@@ -16,9 +16,12 @@ try{
 
 // ----------------------------------
 // LOAD LIB 
-var http 	   = require("http"),
+var http 	   = require('http'),
 	request    = require('request'),
     feedparser = require('feedparser')
+// LOAD Collection accessible 
+var collections= require('./collectionList.js')
+
 
 // ----------------------------------
 // RSS QUERY AND SAVE PART
@@ -26,7 +29,7 @@ var query      = require("./query.js").init(setting)
 
 // ----------------------------------
 // HTTP Server part 
-var read 		= require("./read.js").init(setting)
+var read 		= require("./read.js").init(setting,collections)
 
 // Start the RSS provider (server)
 http.createServer(

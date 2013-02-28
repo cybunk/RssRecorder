@@ -8,16 +8,20 @@
 */
 
 module.exports = {
+
 			    url : require("url"),
-			    utile:require("./utile.js"),
-			    feedparser:require('feedparser'),
-			   	request:require('request'),
+			    utile : require("./utile.js"),
+			    feedparser : require('feedparser'),
+			   	request : require('request'),
 
 			    db:null,
 			    setting:null,
-			    init:function(setting){
+			    collections:null,
+
+			    init:function(setting,collections){
+			    	this.collections = collections
 			    	this.setting = setting;
-					this.db  = require("mongojs").connect(setting.dbName, [setting.dbCollection]);
+					this.db  = require("mongojs").connect(setting.dbName, this.collections.list);
 					return this;
 			    },
 				stat:function(res,q,sort,field){
@@ -26,7 +30,7 @@ module.exports = {
 				},
 				directQuery:function(res,jsonp,query){					
 					var self = this
-					console.log(query.url)
+					//console.log("directQuery",query.url)
 					try{
 						var url  = decodeURIComponent(query.url)
 					}catch(e){
@@ -40,38 +44,21 @@ module.exports = {
 					   	'Accept-Language':'fr-FR,fr;q=0.8,en-US;q=0.6,en;q=0.4',
 					   	'Cache-Control':'no-cache',
 					};
-					/*
-					console.log(q)
+					//console.log(q)
 					try{
-						this.request(q, function (error, response, body) {
-						  if (!error && response.statusCode == 200) {
-						    //console.log(body) // Print the google web page.
-						    self.end(res,"{GotIt:'"+body+"'}",jsonp)
-						  }else{
-						    self.end(res,"{response:'"+response+"',error:'"+error+"'}",jsonp)
-						  }
-						})
-
-					}catch(e){
-						    self.end(res,"{error:'"+e+"'}",jsonp)
-					}
-					*/
-					
-					try{
-
-					this.feedparser.parseUrl(q)
+						this.feedparser.parseUrl(q)
 				  			.on('complete', function(e,a){
 				  				console.log(e,a)
 				  				self.end(res,JSON.stringify(a),jsonp)
-				  			}).on('error', function(e){
-				  				console.log('error',e)
+				  			}).on('error', function(e,a){
+				  				console.log('error',e,a)
 				  				self.end(res,"{error:'"+e+"'}",jsonp)
 				  			});		
 				  	} catch(e) {
 						self.end(res,"{error:'"+e+"'}",jsonp)
 					}	
 				},
-				list:function(res,q,sort,field,skip,limit,jsonp){
+				list:function(res,c,q,sort,field,skip,limit,jsonp){
 					var self = this
 					console.log("q",q)
 					console.log("sort",sort)
@@ -79,7 +66,7 @@ module.exports = {
 
 					//console.log(db)
 					if(field!=undefined || field!=null){
-						db[setting.dbCollection].find(q,field
+						db[c].find(q,field
 						).sort(sort
 						).skip(skip
 						).limit(limit,
@@ -92,7 +79,7 @@ module.exports = {
 							}
 						)
 					}else{
-						this.db[this.setting.dbCollection].find(q
+						this.db[c].find(q
 						).sort(sort
 						).skip(skip
 						).limit(limit,
@@ -117,10 +104,17 @@ module.exports = {
 					 res.end()
 					}
 				},
+				collectionChecking:function(c){
+					for (var i = this.collections.list.length - 1; i >= 0; i--) {
+						if(this.collections.list[i]==c) return true
+					};
+					return false
+				},
 				server:function (req, res) {
 				  var uri   	= this.url.parse(req.url,true),
 				      path  	= uri.pathname,
 				   	  query 	= uri.query,
+				   	  collection= this.collections.default
 				   	  myQuery   = {},
 					  mySort    = {"timeStamp":-1}, // by default serve last element
 				  	  myField	= null,
@@ -135,6 +129,8 @@ module.exports = {
 				  if(typeof(query.field)!="undefined") myField = this.utile.toJson(unescape(query.field))
 				  if(typeof(query.limit)!="undefined" && !isNaN(Number(query.limit)!=NaN)) myLimit = Number(query.limit)
 				  if(typeof(query.skip) !="undefined" && !isNaN(Number(query.skip) !=NaN))  mySkip =  Number(query.skip)
+				  if(typeof(query.collection)!="undefined" && this.collectionChecking(query.collection)) collection = query.collection
+
 
 				  console.log("Callback : ",jsonp)
 				  console.log("Path : ",path)
@@ -148,9 +144,9 @@ module.exports = {
 				  // QUERY :: dq?url=http%3A%2F%2Fstackoverflow.com%2Ffeeds%2Ftag%2Fphp&callback=test
 				  if(path=="/q"){
 				  	if(!query){
-				  		self.list(res,myQuery,null,null,myLimit,jsonp)
+				  		self.list(res,collection,myQuery,null,null,myLimit,jsonp)
 				  	}else{
-				  		self.list(res,myQuery,mySort,myField,mySkip,myLimit,jsonp)
+				  		self.list(res,collection,myQuery,mySort,myField,mySkip,myLimit,jsonp)
 				  	}
 				  } else if(path=="/dq"){
 				  	

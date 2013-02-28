@@ -55,7 +55,15 @@ module.exports = {
 						for (var i = setting.url.length-1; i >= 0; i--) {
 							var url = setting.url[i]
 							console.log(i,url)
-							this.feedparser.parseFile(url)
+							var q 	 = {}
+							q.url 	 = url
+							q.headers= {
+								'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17',
+							   	'Accept-Charset':'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+							   	'Accept-Language':'fr-FR,fr;q=0.8,en-US;q=0.6,en;q=0.4',
+							   	'Cache-Control':'no-cache',
+							}
+							this.feedparser.parseFile(q)
 					  			.on('article', function(e){
 					  				console.log(e.title)
 					  				self.receive(e,self.save)
