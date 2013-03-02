@@ -50,13 +50,13 @@ Or, from the command line:
 git clone https://github.com/cybunk/RssRecorder.git
 ```
 
-Start it : 
+How to start  : 
 
-Recorder part :
-	node rssrecorder.js
+* Recorder part :
+	'node rssrecorder.js setting.js'
 
-Server part :
-	node rssprovider.js
+* Server part :
+	'node rssprovider.js'
 
 ## Configuration 
 
