@@ -2,9 +2,6 @@
 	# NODE JS script :
 	# Read module for rss provider
 	# Author : Samuel Huron 
-
-
-	//http://127.0.0.1:9616/dq?url=http%3A%2F%2Fen.wikipedia.org%2Fw%2Fapi.php%3Faction%3Dfeaturedfeed%26feed%3Dfeatured%26feedformat%3Datom
 */
 
 module.exports = {
@@ -19,6 +16,11 @@ module.exports = {
 			    collections:null,
 
 			    init:function(setting,collections){
+
+			    	if(typeof(setting.CacheControl)=="undefined"){
+			    		setting.CacheControl = "no-cache";
+			    	}
+
 			    	this.collections = collections
 			    	this.setting = setting;
 					this.db  = require("mongojs").connect(setting.dbName, this.collections.list);
@@ -137,7 +139,11 @@ module.exports = {
 
 				  // ----------------------------------
 				  // REQUEST EXEMPLE :: q?query={"title":"Install%20mod_wsgi%20in%20mamp"}
-				  res.writeHead(200, {'Content-Type': 'application/json'});				  	
+
+				  // Start to response to the client 
+				  res.writeHead(200, {'Content-Type': 'application/json',
+				  					  'Cache-Control': this.setting.CacheControl});
+
 				  if(jsonp) res.write(jsonp+"(")		
 
 				  // ----------------------------------
