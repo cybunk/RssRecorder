@@ -66,7 +66,7 @@ module.exports = {
 					console.log("sort",sort)
 					console.log("field",field)
 
-					if(typeof(field)=="object"){
+					if(typeof(field)=="object" && field!=null && field!=undefined){
 						this.db[c].find(q,field
 						).sort(sort
 						).skip(skip
