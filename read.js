@@ -66,9 +66,8 @@ module.exports = {
 					console.log("sort",sort)
 					console.log("field",field)
 
-					//console.log(db)
-					if(field!=undefined || field!=null){
-						db[c].find(q,field
+					if(typeof(field)=="object"){
+						this.db[c].find(q,field
 						).sort(sort
 						).skip(skip
 						).limit(limit,
@@ -87,11 +86,8 @@ module.exports = {
 						).limit(limit,
 							function(err,collection){
 								if(!err){
-									//console.log(collection)
 									self.end(res,JSON.stringify(collection),jsonp)
 								}else{
-									//res.write("{error:'error'}");
-									//if(jsonp) res.end(")") else
 									self.end(res,"{error:'error'}",jsonp)
 								}
 							}
