@@ -89,6 +89,7 @@ module.exports = {
 									self.end(res,JSON.stringify(collection),jsonp)
 								}else{
 									self.end(res,"{error:'error'}",jsonp)
+									self.end(res,"{error:'# "+err+"'}",jsonp)
 								}
 							}
 						)
