@@ -92,7 +92,7 @@ module.exports = {
 								}else{
 									//res.write("{error:'error'}");
 									//if(jsonp) res.end(")") else
-									self.end(res,"{error:'error'}",jsonp)
+									self.end(res,"{error:'# "+err+"'}",jsonp)
 								}
 							}
 						)
