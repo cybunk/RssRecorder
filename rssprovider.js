@@ -19,9 +19,9 @@ try{
 var http 	   = require('http'),
 	request    = require('request'),
     feedparser = require('feedparser')
+
 // LOAD Collection accessible 
 var collections= require('./collectionList.js')
-
 
 // ----------------------------------
 // RSS QUERY AND SAVE PART
@@ -37,3 +37,4 @@ http.createServer(
 					read.server(req, res)
 				}).listen(setting.serverPort);
 
+//{"guid":{"$regex":"en"}}

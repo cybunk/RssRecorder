@@ -8,13 +8,6 @@ module.exports = {
 	dbName:"_vs_examples",
 	dbCollection:"stackoverflow",
 
-	// TODO ...?
-	dbCollectionAccess:[
-	"stackoverflow",
-	"news",
-	"nerd-news"
-	],
-
 	// HTTP server port 
 	serverPort:9616,
 	

@@ -133,7 +133,7 @@ module.exports = {
 				  if(typeof(query.skip) !="undefined" && !isNaN(Number(query.skip) !=NaN))  mySkip =  Number(query.skip)
 				  if(typeof(query.collection)!="undefined" && this.collectionChecking(query.collection)) collection = query.collection
 
-
+				  console.log("Query :",myQuery)
 				  console.log("Callback : ",jsonp)
 				  console.log("Path : ",path)
 
