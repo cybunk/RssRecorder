@@ -17,5 +17,6 @@ module.exports = {
 		//"http://stackoverflow.com/feeds/tag/php",
 		],
 	delay:60*1000,  // interval to update in milllisecondes, default = 2 minute
+	CacheControl:"max-age=60",	// for the rssprovider  (HTTP TTL, in pages)
 	id:'guid'		// element to distinguish one entry to anoter
 }
